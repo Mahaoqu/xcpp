@@ -9,18 +9,21 @@
 #include "v8.h"
 #include "libplatform/libplatform.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
   // Initialize V8.
   v8::V8::InitializeICUDefaultLocation(argv[0]);
   v8::V8::InitializeExternalStartupData(argv[0]);
   std::unique_ptr<v8::Platform> platform = v8::platform::NewDefaultPlatform();
   v8::V8::InitializePlatform(platform.get());
   v8::V8::Initialize();
+
   // Create a new Isolate and make it the current one.
   v8::Isolate::CreateParams create_params;
   create_params.array_buffer_allocator =
       v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-  v8::Isolate* isolate = v8::Isolate::New(create_params);
+  v8::Isolate *isolate = v8::Isolate::New(create_params);
+
   {
     v8::Isolate::Scope isolate_scope(isolate);
     // Create a stack-allocated handle scope.
@@ -43,6 +46,7 @@ int main(int argc, char* argv[]) {
     v8::String::Utf8Value utf8(isolate, result);
     printf("%s\n", *utf8);
   }
+
   // Dispose the isolate and tear down V8.
   isolate->Dispose();
   v8::V8::Dispose();
