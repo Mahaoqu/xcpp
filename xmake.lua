@@ -1,4 +1,5 @@
 add_requires("v8", "sfml", "cppzmq", "gtest")
+set_languages("c++17")
 
 target("main")
     set_kind("binary")
