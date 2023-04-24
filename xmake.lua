@@ -4,11 +4,11 @@ add_requires("v8", "sfml", "cppzmq", "gtest")
 set_languages("c++17")
 
 add_defines("V8_COMPRESS_POINTERS")
+add_includedirs("$(projectdir)/include")
 
 target("engine")
     set_kind("static")
     add_files("src/*.cpp")
-    add_includedirs("include")
     add_packages("v8", "sfml", "cppzmq")
     
 includes("examples/**/xmake.lua", "test")

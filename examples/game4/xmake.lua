@@ -1,4 +1,4 @@
-target("game1")
+target("game4")
     set_kind("binary")
     add_files("*.cpp")
     add_deps("engine")

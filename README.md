@@ -13,3 +13,9 @@ Rebuild with
 xmake project -k compile_commands 
 ```
 
+Now we can running with:
+
+```
+xmake build <example_name>
+xmake run <example_name>
+```
