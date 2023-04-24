@@ -1,0 +1,7 @@
+target("scriptdemo")
+    set_kind("binary")
+    add_files("*.cpp")
+    add_deps("engine")
+    add_includedirs("$(projectdir)/include")
+    add_packages("v8")
+    set_rundir(os.scriptdir())

@@ -1,8 +1,10 @@
 #include "ScriptManager.h"
-#include <v8.h>
-#include <libplatform/libplatform.h>
-#include <iostream>
 #include "v8helpers.h"
+#include "GameObject.h"
+
+#include <v8.h>
+#include <iostream>
+#include <libplatform/libplatform.h>
 #include <cstdio>
 
 void usage()
@@ -28,7 +30,6 @@ void usage()
 
 int main(int argc, char **argv)
 {
-
 	/*
 	 * NOTE: You must initialize v8 in main, otherwise handles will go out of scope.
 	 *
