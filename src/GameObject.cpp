@@ -1,11 +1,13 @@
 #include "GameObject.h"
 #include <iostream>
 
-#include <filesystem>
-#include <cstring>
 #include "ScriptManager.h"
 #include "v8helpers.h"
+#include <cstring>
+#include <filesystem>
 
+namespace GameEngine
+{
 /** Definitions of static class members */
 int GameObject::current_guid = 0;
 std::vector<GameObject *> GameObject::game_objects;
@@ -16,14 +18,14 @@ std::vector<GameObject *> GameObject::game_objects;
  */
 GameObject::GameObject() : x(0), y(0)
 {
-	guid = "gameobject" + std::to_string(current_guid);
-	current_guid++;
-	game_objects.push_back(this);
+    guid = "gameobject" + std::to_string(current_guid);
+    current_guid++;
+    game_objects.push_back(this);
 }
 
 GameObject::~GameObject()
 {
-	context->Reset();
+    context->Reset();
 }
 
 /**
@@ -32,13 +34,14 @@ GameObject::~GameObject()
  * instantiated this exact type of vector and passed it in. If you don't the
  * helper function will not work.
  */
-v8::Local<v8::Object> GameObject::exposeToV8(v8::Isolate *isolate, v8::Local<v8::Context> &context, std::string context_name)
+v8::Local<v8::Object> GameObject::exposeToV8(v8::Isolate *isolate, v8::Local<v8::Context> &context,
+                                             std::string context_name)
 {
-	std::vector<v8helpers::ParamContainer<v8::AccessorGetterCallback, v8::AccessorSetterCallback>> v;
-	v.push_back(v8helpers::ParamContainer("x", getGameObjectX, setGameObjectX));
-	v.push_back(v8helpers::ParamContainer("y", getGameObjectY, setGameObjectY));
-	v.push_back(v8helpers::ParamContainer("guid", getGameObjectGUID, setGameObjectGUID));
-	return v8helpers::exposeToV8(guid, this, v, isolate, context, context_name);
+    std::vector<v8helpers::ParamContainer<v8::AccessorGetterCallback, v8::AccessorSetterCallback>> v;
+    v.push_back(v8helpers::ParamContainer("x", getGameObjectX, setGameObjectX));
+    v.push_back(v8helpers::ParamContainer("y", getGameObjectY, setGameObjectY));
+    v.push_back(v8helpers::ParamContainer("guid", getGameObjectGUID, setGameObjectGUID));
+    return v8helpers::exposeToV8(guid, this, v, isolate, context, context_name);
 }
 
 /**
@@ -52,57 +55,62 @@ v8::Local<v8::Object> GameObject::exposeToV8(v8::Isolate *isolate, v8::Local<v8:
  * order for v8 to accept these functions.
  */
 
-void GameObject::setGameObjectX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info)
+void GameObject::setGameObjectX(v8::Local<v8::String> property, v8::Local<v8::Value> value,
+                                const v8::PropertyCallbackInfo<void> &info)
 {
-	v8::Local<v8::Object> self = info.Holder();
-	v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-	void *ptr = wrap->Value();
-	static_cast<GameObject *>(ptr)->x = value->Int32Value(info.GetIsolate()->GetCurrentContext()).FromJust();
+    v8::Local<v8::Object> self = info.Holder();
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+    void *ptr = wrap->Value();
+    static_cast<GameObject *>(ptr)->x = value->Int32Value(info.GetIsolate()->GetCurrentContext()).FromJust();
 }
 
 void GameObject::getGameObjectX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info)
 {
-	v8::Local<v8::Object> self = info.Holder();
-	v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-	void *ptr = wrap->Value();
-	int x_val = static_cast<GameObject *>(ptr)->x;
-	info.GetReturnValue().Set(x_val);
+    v8::Local<v8::Object> self = info.Holder();
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+    void *ptr = wrap->Value();
+    int x_val = static_cast<GameObject *>(ptr)->x;
+    info.GetReturnValue().Set(x_val);
 }
 
-void GameObject::setGameObjectY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info)
+void GameObject::setGameObjectY(v8::Local<v8::String> property, v8::Local<v8::Value> value,
+                                const v8::PropertyCallbackInfo<void> &info)
 {
-	v8::Local<v8::Object> self = info.Holder();
-	v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-	void *ptr = wrap->Value();
-	static_cast<GameObject *>(ptr)->y = value->Int32Value(info.GetIsolate()->GetCurrentContext()).FromJust();
+    v8::Local<v8::Object> self = info.Holder();
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+    void *ptr = wrap->Value();
+    static_cast<GameObject *>(ptr)->y = value->Int32Value(info.GetIsolate()->GetCurrentContext()).FromJust();
 }
 
 void GameObject::getGameObjectY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info)
 {
-	v8::Local<v8::Object> self = info.Holder();
-	v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-	void *ptr = wrap->Value();
-	int y_val = static_cast<GameObject *>(ptr)->y;
-	info.GetReturnValue().Set(y_val);
+    v8::Local<v8::Object> self = info.Holder();
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+    void *ptr = wrap->Value();
+    int y_val = static_cast<GameObject *>(ptr)->y;
+    info.GetReturnValue().Set(y_val);
 }
 
-void GameObject::setGameObjectGUID(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void> &info)
+void GameObject::setGameObjectGUID(v8::Local<v8::String> property, v8::Local<v8::Value> value,
+                                   const v8::PropertyCallbackInfo<void> &info)
 {
-	v8::Local<v8::Object> self = info.Holder();
-	v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-	void *ptr = wrap->Value();
-	v8::String::Utf8Value utf8_str(info.GetIsolate(), value->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked());
-	static_cast<GameObject *>(ptr)->guid = *utf8_str;
+    v8::Local<v8::Object> self = info.Holder();
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+    void *ptr = wrap->Value();
+    v8::String::Utf8Value utf8_str(info.GetIsolate(),
+                                   value->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked());
+    static_cast<GameObject *>(ptr)->guid = *utf8_str;
 }
 
 void GameObject::getGameObjectGUID(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value> &info)
 {
-	v8::Local<v8::Object> self = info.Holder();
-	v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
-	void *ptr = wrap->Value();
-	std::string guid = static_cast<GameObject *>(ptr)->guid;
-	v8::Local<v8::String> v8_guid = v8::String::NewFromUtf8(info.GetIsolate(), guid.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-	info.GetReturnValue().Set(v8_guid);
+    v8::Local<v8::Object> self = info.Holder();
+    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(self->GetInternalField(0));
+    void *ptr = wrap->Value();
+    std::string guid = static_cast<GameObject *>(ptr)->guid;
+    v8::Local<v8::String> v8_guid =
+        v8::String::NewFromUtf8(info.GetIsolate(), guid.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+    info.GetReturnValue().Set(v8_guid);
 }
 
 /**
@@ -115,21 +123,22 @@ void GameObject::getGameObjectGUID(v8::Local<v8::String> property, const v8::Pro
  */
 void GameObject::ScriptedGameObjectFactory(const v8::FunctionCallbackInfo<v8::Value> &args)
 {
-	v8::Isolate *isolate = args.GetIsolate();
-	v8::Local<v8::Context> context = isolate->GetCurrentContext();
-	v8::EscapableHandleScope handle_scope(args.GetIsolate());
-	v8::Context::Scope context_scope(context);
+    v8::Isolate *isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
+    v8::EscapableHandleScope handle_scope(args.GetIsolate());
+    v8::Context::Scope context_scope(context);
 
-	std::string context_name("default");
-	if (args.Length() == 1)
-	{
-		v8::String::Utf8Value str(args.GetIsolate(), args[0]);
-		context_name = std::string(v8helpers::ToCString(str));
+    std::string context_name("default");
+    if (args.Length() == 1)
+    {
+        v8::String::Utf8Value str(args.GetIsolate(), args[0]);
+        context_name = std::string(v8helpers::ToCString(str));
 #if GO_DEBUG
-		std::cout << "Created new object in context " << context_name << std::endl;
+        std::cout << "Created new object in context " << context_name << std::endl;
 #endif
-	}
-	GameObject *new_object = new GameObject();
-	v8::Local<v8::Object> v8_obj = new_object->exposeToV8(isolate, context);
-	args.GetReturnValue().Set(handle_scope.Escape(v8_obj));
+    }
+    GameObject *new_object = new GameObject();
+    v8::Local<v8::Object> v8_obj = new_object->exposeToV8(isolate, context);
+    args.GetReturnValue().Set(handle_scope.Escape(v8_obj));
 }
+} // namespace GameEngine
