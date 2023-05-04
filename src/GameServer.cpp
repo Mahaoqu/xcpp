@@ -5,7 +5,7 @@
 namespace GameEngine
 {
 
-GameServer::GameServer() : context(1)
+GameServer::GameServer() : context(1), rep(context, zmq::socket_type::rep)
 {
 }
 
@@ -16,39 +16,61 @@ GameServer::~GameServer()
 void GameServer::newHandleClientThread()
 {
     std::thread t([&]() {
-        zmq::socket_t rep(context, zmq::socket_type::rep);
-        rep.bind("tcp://*:5555");
+        rep.bind("tcp://*:" + std::to_string(port));
+        std::cout << "Binding at port: " << port << std::endl;
 
         while (true)
         {
-            zmq::message_t request;
-            rep.recv(request, zmq::recv_flags::none);
-
-            if (request.size() == 0)
-                continue;
-
-            char *data = static_cast<char *>(request.data());
-
-            PacketType type = static_cast<PacketType>(data[0]);
-
-            char *payload = data + 1;
-            switch (type)
+            try
             {
-            case PacketType::PT_HELLO:
-                onNewClient(payload);
-                break;
+                zmq::message_t request;
+                rep.recv(&request);
+                LOG("Received request");
 
-            case PacketType::PT_INPUT:
-                onClientInput(payload);
-                break;
+                if (request.size() == 0)
+                    continue;
 
-            case PacketType::PT_DISCONNECT:
-                onClientDisconnected(payload);
-                break;
+                char *data = static_cast<char *>(request.data());
 
-            default:
-                std::cerr << "Invalid packet type received." << std::endl;
-                break;
+                PacketType type = static_cast<PacketType>(data[0]);
+
+                json j, q;
+                std::stringstream ss(data + 1, request.size() - 1);
+                if (request.size() > 1)
+                    ss >> j;
+
+                switch (type)
+                {
+                case PacketType::PT_HELLO:
+                    q = onNewClient(j);
+                    break;
+
+                case PacketType::PT_INPUT:
+                    q = onClientInput(j);
+                    break;
+
+                case PacketType::PT_DISCONNECT:
+                    q = onClientDisconnected(j);
+                    break;
+
+                default:
+                    std::cerr << "Invalid packet type received." << std::endl;
+                    break;
+                }
+                std::string s = Network::setWelcomePacket(q);
+                rep.send(zmq::message_t(s));
+            }
+            catch (const zmq::error_t &e)
+            {
+                std::cerr << "ZeroMQ error: " << e.what() << std::endl;
+            }
+            catch (std::exception &e)
+            {
+                std::cerr << "Exception: " << e.what() << std::endl;
+            }
+            catch (...)
+            {
+                std::cerr << "Unknown exception" << std::endl;
             }
         }
     });
@@ -57,17 +79,17 @@ void GameServer::newHandleClientThread()
 
 void GameServer::addObject(GameObject *obj)
 {
-    GameObject::game_objects.push_back(obj);
+    GameObjectManager::Get().add(obj);
 }
 
 void GameServer::run()
 {
-    std::cout << "Running Game Server at port " << port << std::endl;
-
     zmq::socket_t publisher(context, zmq::socket_type::pub);
-    publisher.bind("tcp://*:5556");
+    publisher.bind("tcp://*:" + std::to_string(publish_port));
+    std::cout << "Binding publish at port: " << publish_port << std::endl;
 
     // Init game state
+    beforeServerStart();
 
     // Recv client
     newHandleClientThread();
@@ -80,10 +102,10 @@ void GameServer::run()
         gameLogic();
 
         // Publish game state / publish game event
-        std::string game_state = getGameStates();
+        std::string game_state;
+        game_state += (char)PacketType::PT_WORLDSTATE;
+        game_state += getGameStates().dump();
         publisher.send(zmq::message_t(game_state));
-
-        // std::cout << "Sending game state " << game_state.size() << " bytes." << std::endl;
 
         // Sleep
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
@@ -92,13 +114,8 @@ void GameServer::run()
 
 void GameServer::gameLogic()
 {
-    // handle all events
-
     // update logics
-    for (auto obj : GameObjectManager::Get().getObjects())
-    {
-        obj->update(tl);
-    }
+    GameObjectManager::Get().forEach([&](GameObject *obj) { obj->update(tl); });
 }
 
 json GameServer::getGameStates()

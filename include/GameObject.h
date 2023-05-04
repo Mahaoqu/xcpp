@@ -68,7 +68,7 @@ class GameObject
      * Shared list of all instances of game objects...auto populated by the
      * constructor.
      */
-    static std::vector<GameObject *> game_objects;
+    // Using singleton GameObjectManager
 
     /**
      * Factor methods for creating new instances of GameObjects.
@@ -88,6 +88,7 @@ class GameObject
     bool renderable = false;
     virtual void render(sf::RenderWindow &window)
     {
+        
     }
 
     /**

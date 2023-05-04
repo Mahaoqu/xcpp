@@ -9,27 +9,37 @@ class GameServer
 {
   private:
     zmq::context_t context;
+    zmq::socket_t rep;
     int port = 5555;
+    int publish_port = 5556;
 
     Timeline tl;
 
   public:
-    GameServer(/* args */);
+    GameServer();
     ~GameServer();
 
     void newHandleClientThread();
     void addObject(GameObject *obj);
     void run();
 
-    virtual void onNewClient(void *payload)
+    virtual void beforeServerStart()
     {
     }
 
-    virtual void onClientDisconnected(void *payload)
+    virtual json onNewClient(json nc)
     {
+        return json();
     }
-    virtual void onClientInput(void *payload)
+
+    virtual json onClientDisconnected(json cd)
     {
+        return json();
+    }
+
+    virtual json onClientInput(json input)
+    {
+        return json();
     }
 
     void gameLogic();

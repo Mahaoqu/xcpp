@@ -19,6 +19,7 @@ class GameObjectManager
 {
   private:
     std::list<GameObject *> gameObjects;
+    std::mutex mutex;
 
   public:
     static GameObjectManager &Get()
@@ -30,10 +31,36 @@ class GameObjectManager
     GameObjectManager() = default;
     ~GameObjectManager() = default;
 
-    std::list<GameObject *> &getObjects()
+    void forEach(std::function<void(GameObject *)> func)
     {
-        return gameObjects;
+        std::lock_guard<std::mutex> lock(mutex);
+        for (auto &&obj : gameObjects)
+        {
+            func(obj);
+        }
     }
+
+    GameObject *fromGUID(std::string guid)
+    {
+        for (auto &&obj : gameObjects)
+        {
+            if (obj->guid == guid)
+                return obj;
+        }
+        return nullptr;
+    }
+
+    std::vector<GameObject *> fromKlassType(uint32_t klassID)
+    {
+        std::vector<GameObject *> objs;
+        for (auto &&obj : gameObjects)
+        {
+            if (obj->GetClassId() == klassID)
+                objs.push_back(obj);
+        }
+        return objs;
+    }
+
     void add(GameObject *gameObject);
     json toJSON();
     void fromJSON(json j);

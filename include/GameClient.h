@@ -21,6 +21,8 @@ class GameClient
 
     // network
     zmq::context_t context;
+    zmq::socket_t req;
+
     const int port = 5555;
     const int publish_port = 5556;
     bool is_connnect_to_server = false;
@@ -45,8 +47,7 @@ class GameClient
     void init();
     void run();
 
-    void addToScene(GameObject *obj);
-    void removeFromScene(GameObject *obj);
+    void set_connect_to_server(bool is_connnect_to_server);
 };
 
 } // namespace GameEngine

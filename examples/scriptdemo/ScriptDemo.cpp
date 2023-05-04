@@ -135,10 +135,9 @@ int main(int argc, char **argv)
                 else if (c == 'l')
                 {
                     std::cout << "List of current GameObjects" << std::endl;
-                    for (GameObject *g : GameObjectManager::Get().getObjects())
-                    {
+                    GameObjectManager::Get().forEach([](GameObject *g) {
                         std::cout << "\t" << g->guid << ": " << g->x << ", " << g->y << std::endl;
-                    }
+                    });
                 }
                 else if (c == 'a')
                 {

@@ -6,6 +6,7 @@ namespace GameEngine
 
 void GameObjectManager::add(GameObject *gameObject)
 {
+    // std::lock_guard<std::mutex> lock(mutex);
     gameObjects.push_back(gameObject);
 }
 
@@ -21,17 +22,28 @@ json GameObjectManager::toJSON()
 
 void GameObjectManager::fromJSON(json j)
 {
-    for (auto gameObject : gameObjects)
-    {
-        delete gameObject;
-    }
-    gameObjects.clear();
+    // LOG("Update Game State from json");
+    std::lock_guard<std::mutex> lock(mutex);
+
     for (auto gameObjectJSON : j)
     {
-        // Find the class of the object
-        GameObject *gameObject = GameObjectRegistry::Get().CreateGameObject(gameObjectJSON["classId"]);
-        gameObject->fromJSON(gameObjectJSON);
-        gameObjects.push_back(gameObject);
+        std::string s = gameObjectJSON["guid"];
+
+        GameObject *g = fromGUID(s);
+        if (g != nullptr)
+        {
+            g->fromJSON(gameObjectJSON);
+        }
+        else
+        {
+            // Find the class of the object
+            uint32_t classId = gameObjectJSON["type"];
+            LOG("Add new game object", classId);
+
+            GameObject *gameObject = GameObjectRegistry::Get().createGameObject(classId);
+            gameObject->fromJSON(gameObjectJSON);
+        }
+        // delete unused game object
     }
 }
 

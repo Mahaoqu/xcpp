@@ -20,16 +20,22 @@ class GameObjectRegistry
         return sInstance;
     }
 
-    template <typename T> void RegisterGameObject()
+    template <typename T> void registerGameObject()
     {
         assert(mNameToGameObjectCreationFunctionMap.find(T::kClassId) == mNameToGameObjectCreationFunctionMap.end());
         mNameToGameObjectCreationFunctionMap[T::kClassId] = &T::CreateInstance;
+        LOG("GameObjectRegistry::registerGameObject: ", T::kClassId);
     }
 
-    GameObject *CreateGameObject(uint32_t inClassId)
+    GameObject *createGameObject(uint32_t inClassId)
     {
         // add error checking if desired- for now crash if not found
         GameObjectCreationFunc creationFunc = mNameToGameObjectCreationFunctionMap[inClassId];
+        if (creationFunc == nullptr)
+        {
+            std::cerr << "GameObjectRegistry::createGameObject failed to find class id: " << inClassId << std::endl;
+            return nullptr;
+        }
         GameObject *gameObject = creationFunc();
         return gameObject;
     }

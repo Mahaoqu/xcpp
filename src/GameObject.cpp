@@ -21,7 +21,6 @@ GameObject::GameObject() : x(0), y(0), isCollidable(false)
     guid = "gameobject" + std::to_string(current_guid);
     current_guid++;
     GameObjectManager::Get().add(this);
-    game_objects.push_back(this);
 }
 
 GameObject::~GameObject()

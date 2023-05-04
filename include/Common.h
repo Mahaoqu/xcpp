@@ -23,4 +23,20 @@
 
 using json = nlohmann::json;
 
+namespace GameEngine
+{
+
+template <typename T> inline void LOG(T msg)
+{
+    std::cerr << msg << std::endl;
+}
+
+template <typename T, typename... Args>
+inline void LOG(T t, Args... args) {
+    std::cerr << t << " ";
+    LOG(args...);
+}
+
+} // namespace GameEngine
+
 #endif // !_GAME_ENGINE_COMMON_H_

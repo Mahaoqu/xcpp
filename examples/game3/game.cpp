@@ -16,11 +16,6 @@ void RecObject::render(sf::RenderWindow &window)
     window.draw(rect);
 }
 
-void Character::render(sf::RenderWindow &window)
-{
-    RecObject::render(window);
-}
-
 void MovingObject::update(const Timeline &tl)
 {
     float dt = tl.getLastDeltaTime();
@@ -30,7 +25,5 @@ void MovingObject::update(const Timeline &tl)
 
 void Character::update(const Timeline &tl)
 {
-    
-
     MovingObject::update(tl);
 }
