@@ -6,22 +6,20 @@
 namespace GameEngine
 {
 
-class Event : public GameObject
+class EventQueue
 {
   private:
     /* data */
   public:
-    Event(/* args */);
-    ~Event();
-
-    static std::list<GameObject *> listener;
+    EventQueue(/* args */);
+    ~EventQueue();
 };
 
-Event::Event(/* args */)
+EventQueue::EventQueue(/* args */)
 {
 }
 
-Event::~Event()
+EventQueue::~EventQueue()
 {
 }
 

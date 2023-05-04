@@ -10,6 +10,7 @@ namespace GameEngine
 {
 /** Definitions of static class members */
 int GameObject::current_guid = 0;
+
 std::vector<GameObject *> GameObject::game_objects;
 
 /**
@@ -26,6 +27,11 @@ GameObject::GameObject() : x(0), y(0)
 GameObject::~GameObject()
 {
     context->Reset();
+}
+
+int GameObject::getCurrentGUID()
+{
+    return GameObject::current_guid;
 }
 
 /**
@@ -141,4 +147,14 @@ void GameObject::ScriptedGameObjectFactory(const v8::FunctionCallbackInfo<v8::Va
     v8::Local<v8::Object> v8_obj = new_object->exposeToV8(isolate, context);
     args.GetReturnValue().Set(handle_scope.Escape(v8_obj));
 }
+
+/**
+ *
+ *
+ */
+GameObject *GameObject::GameObjectFactory(std::string context_name)
+{
+    return nullptr;
+}
+
 } // namespace GameEngine

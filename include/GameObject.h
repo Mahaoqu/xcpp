@@ -1,9 +1,24 @@
 #pragma once
 
-#include <utility>
+#include "Common.h"
+#include "Timeline.h"
 #include <v8.h>
 
 #define GO_DEBUG 0
+
+#define CLASS_IDENTIFICATION(inCode, inClass)                                                                          \
+    enum                                                                                                               \
+    {                                                                                                                  \
+        kClassId = inCode                                                                                              \
+    };                                                                                                                 \
+    virtual uint32_t GetClassId() const                                                                                \
+    {                                                                                                                  \
+        return kClassId;                                                                                               \
+    }                                                                                                                  \
+    static GameObject *CreateInstance()                                                                                \
+    {                                                                                                                  \
+        return new inClass();                                                                                          \
+    }
 
 namespace GameEngine
 {
@@ -14,11 +29,14 @@ namespace GameEngine
  * NOTE: I've used GameObject to help you think about the functionality as it
  * relates to scripting, but this could be any kind of objet (i.e., Events)..
  */
+
+class Event;
+
 class GameObject
 {
   public:
     GameObject();
-    ~GameObject();
+    virtual ~GameObject();
 
     std::string guid;
     int x;
@@ -58,6 +76,30 @@ class GameObject
      */
     static GameObject *GameObjectFactory(std::string context_name = "default");
     static void ScriptedGameObjectFactory(const v8::FunctionCallbackInfo<v8::Value> &args);
+
+    /**
+     * Render interface for GameObjects.
+     * Into SFML window.
+     */
+    bool renderable = false;
+    virtual void render(sf::RenderWindow &window)
+    {
+    }
+
+    /**
+     *  Update interface for GameObjects. Connects to Timeline.
+     */
+    virtual void update(const Timeline &timeline)
+    {
+    }
+
+    /**
+     *  Handle events interface for GameObjects. Default do nothing.
+     */
+    virtual bool onEvent(const Event &event)
+    {
+        return true;
+    }
 
   private:
     /** Static variable to keep count of current number of GameObject instances */

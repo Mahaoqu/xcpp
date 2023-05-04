@@ -1,22 +1,29 @@
+#pragma once
+
+#include "GameObject.h"
+
+namespace GameEngine
+{
 
 class GameServer
 {
   private:
-    /* data */
+    zmq::context_t context;
+    int port = 5555;
+
+    Timeline tl;
+
   public:
     GameServer(/* args */);
     ~GameServer();
+
+    void newHandleClientThread();
+    void addObject(GameObject *obj);
     void run();
+
+    void gameLogic();
+
+    std::string getGameStates();
 };
 
-GameServer::GameServer(/* args */)
-{
-}
-
-GameServer::~GameServer()
-{
-}
-
-void GameServer::run()
-{
-}
+} // namespace GameEngine

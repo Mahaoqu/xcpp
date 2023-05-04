@@ -11,30 +11,30 @@
 int main()
 {
     zmq::context_t context(1);
-    zmq::socket_t router(context, zmq::socket_type::router);
-    router.bind("tcp://*:5555");
+    zmq::socket_t rep(context, zmq::socket_type::rep);
+    rep.bind("tcp://*:5555");
+
+    zmq::socket_t publisher(context, zmq::socket_type::pub);
+    publisher.bind("tcp://*:5556");
 
     int iteration = 0;
 
-    std::unordered_map<int, int> client_on_connection_count;
-    std::mutex connection_times_mutex;
-    int next_client_id = 1;
+    std::vector<int> client_on_connection_count;
+    std::mutex cmtx;
 
     auto handle_client = [&]() {
         while (true)
         {
-            zmq::multipart_t multipart;
-            multipart.recv(router);
-            int client_id = std::stoi(multipart[0].to_string());
+            zmq::message_t msg;
+            rep.recv(&msg);
 
-            if(client_id == 0) 
-            {
-                zmq::multipart_t reply;
-                reply.addstr(std::to_string(next_client_id));
-                reply.send(router);
-            }
+            std::cout << "Client " << client_on_connection_count.size() + 1 << " Connected" << std::endl;
 
-            next_client_id++;
+            std::unique_lock<std::mutex> lock(cmtx);
+            client_on_connection_count.push_back(iteration);
+            lock.unlock();
+
+            rep.send(zmq::str_buffer("Hello, client!"), zmq::send_flags::none);
         }
     };
 
@@ -43,21 +43,21 @@ int main()
 
     while (true)
     {
-        // sleep for 1 second
+        std::cout << "Iteration " << iteration << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
         iteration++;
 
-        for (int i = 1; i <= next_client_id; ++i)
+        std::stringstream ss;
+
+        std::unique_lock<std::mutex> lock(cmtx);
+        for (int i = 0; i < client_on_connection_count.size(); i++)
         {
-            zmq::multipart_t reply;
-            reply.addstr(std::to_string(i));
-
-            std::stringstream message;
-            message << "Client " << i << ": Iteration " << iteration;
-            reply.addstr(message.str());
-
-            reply.send(router);
+            ss << "Client " << i + 1 << ": Iteration " << iteration - client_on_connection_count[i] << std::endl;
         }
+        lock.unlock();
+        zmq::message_t message(ss.str());
+
+        publisher.send(message);
     }
 
     return 0;
