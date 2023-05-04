@@ -38,9 +38,13 @@ class GameObject
     GameObject();
     virtual ~GameObject();
 
+    CLASS_IDENTIFICATION('GOBJ', GameObject)
+
     std::string guid;
     int x;
     int y;
+
+    bool isCollidable;
 
     /**
      * This function will make this class instance accessible to scripts in
@@ -99,6 +103,36 @@ class GameObject
     virtual bool onEvent(const Event &event)
     {
         return true;
+    }
+
+    virtual bool isColliding(const GameObject &other)
+    {
+        return false;
+    }
+
+    /**
+     * Serialize interface for GameObjects.
+     */
+    virtual json toJSON()
+    {
+        json j;
+        j["type"] = kClassId; // For initialization
+        j["guid"] = guid;
+        j["x"] = x;
+        j["y"] = y;
+        j["isCollidable"] = isCollidable;
+        return j;
+    }
+
+    /**
+     * Deserialize interface for GameObjects.
+     */
+    virtual void fromJSON(json j)
+    {
+        guid = j["guid"];
+        x = j["x"];
+        y = j["y"];
+        isCollidable = j["isCollidable"];
     }
 
   private:

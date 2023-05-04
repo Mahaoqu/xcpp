@@ -1,4 +1,5 @@
 #include "GameObject.h"
+#include "GameObjectManager.h"
 #include "ScriptManager.h"
 #include "v8helpers.h"
 
@@ -134,7 +135,7 @@ int main(int argc, char **argv)
                 else if (c == 'l')
                 {
                     std::cout << "List of current GameObjects" << std::endl;
-                    for (GameObject *g : GameObject::game_objects)
+                    for (GameObject *g : GameObjectManager::Get().getObjects())
                     {
                         std::cout << "\t" << g->guid << ": " << g->x << ", " << g->y << std::endl;
                     }

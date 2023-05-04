@@ -14,19 +14,29 @@ enum ReplicationAction
     RA_MAX,
 };
 
+// Singleton to manage all game
 class GameObjectManager
 {
   private:
     std::list<GameObject *> gameObjects;
 
   public:
-    GameObjectManager(/* args */);
-    ~GameObjectManager();
+    static GameObjectManager &Get()
+    {
+        static GameObjectManager sInstance;
+        return sInstance;
+    }
 
+    GameObjectManager() = default;
+    ~GameObjectManager() = default;
+
+    std::list<GameObject *> &getObjects()
+    {
+        return gameObjects;
+    }
     void add(GameObject *gameObject);
-
-    void serialize();
-    void deserialize();
+    json toJSON();
+    void fromJSON(json j);
 };
 
 } // namespace GameEngine

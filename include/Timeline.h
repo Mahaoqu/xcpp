@@ -56,7 +56,12 @@ class Timeline
         return Clock::cycleToSeconds(clock.time_cycles);
     }
 
-    inline void addNewKeyFrame()
+    inline int getFrameCount() const
+    {
+        return clock.time_cycles;
+    }
+
+    inline void newFrame()
     {
         auto now = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> dt = now - last_time;

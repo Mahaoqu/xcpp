@@ -1,4 +1,5 @@
 #include "GameClient.h"
+#include "GameObjectManager.h"
 
 namespace GameEngine
 {
@@ -6,12 +7,45 @@ namespace GameEngine
 void GameClient::render()
 {
     window.clear();
-    for (auto obj : GameObject::game_objects)
+    for (auto obj : GameObjectManager::Get().getObjects())
     {
         obj->render(window);
     }
 
     window.display();
+}
+
+void GameClient::newHandleServerThread()
+{
+    if (is_connnect_to_server)
+    {
+        std::thread network_thread([&]() {
+            // connect to server
+            std::cout << "Connecting to server at " << this->server_addr << std::endl;
+
+            zmq::socket_t req(context, zmq::socket_type::req);
+            req.connect("tcp://" + this->server_addr + ":" + std::to_string(this->port));
+
+            // send hello packet
+            auto hello_packet = Network::setHelloPacket();
+            req.send(zmq::message_t(hello_packet));
+
+            // get reply
+            zmq::message_t reply;
+            req.recv(&reply);
+            json j = Network::parseFromWelcomePacket((char *)reply.data(), reply.size());
+            this->client_id = j["id"];
+
+            state = NetworkClientState::NCS_SayingHello;
+
+            // receive game state
+            while (true)
+            {
+            }
+        });
+
+        network_thread.detach();
+    }
 }
 
 void GameClient::handleKeyPress(sf::Keyboard::Key key)
@@ -24,7 +58,7 @@ void GameClient::handleKeyRelease(sf::Keyboard::Key key)
     this->pressed_keys.erase(key);
 }
 
-GameClient::GameClient(/* args */)
+GameClient::GameClient() : context(1)
 {
 }
 
@@ -41,18 +75,7 @@ void GameClient::init()
 void GameClient::run()
 {
     // add network thread
-    if (is_connnect_to_server)
-    {
-        std::thread network_thread;
-        network_thread = std::thread([&]() {
-            // connect to server
-
-            std::cout << "Connecting to server at " << this->server_addr << std::endl;
-            // receive game state
-        });
-
-        network_thread.detach();
-    }
+    newHandleServerThread();
 
     window.setActive();
 
@@ -79,7 +102,15 @@ void GameClient::run()
 
 void GameClient::addToScene(GameObject *obj)
 {
-    GameObject::game_objects.push_back(obj);
+    GameObjectManager::Get().add(obj);
+}
+
+void GameClient::handleGameState(json j)
+{
+    j["time"];
+    json objs = j["objects"];
+
+    GameObjectManager::Get().fromJSON(objs);
 }
 
 } // namespace GameEngine

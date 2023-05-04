@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "GameObject.h"
+#include "GameObjectRegistry.h"
 
 #include <iostream>
 
@@ -8,10 +9,10 @@ using namespace GameEngine;
 class RecObject : public GameObject
 {
   public:
+    CLASS_IDENTIFICATION('ROBJ', RecObject)
+
     int width;
     int height;
-    bool collidable = false;
-
     sf::Color color;
 
     RecObject() : GameObject()
@@ -31,8 +32,9 @@ class RecObject : public GameObject
 class MovingObject : public RecObject
 {
   public:
-    sf::Vector2f velocity;
+    CLASS_IDENTIFICATION('MOBJ', MovingObject)
 
+    sf::Vector2f velocity;
     MovingObject() : RecObject()
     {
     }
@@ -47,6 +49,8 @@ class MovingObject : public RecObject
 class Character : public MovingObject
 {
   public:
+    CLASS_IDENTIFICATION('CHAR', Character)
+
     bool onJumping = false;
     bool onGround = false;
 
@@ -67,8 +71,14 @@ class Character : public MovingObject
     {
     }
 
-    void updateByInput();
-
     virtual void render(sf::RenderWindow &window) override;
     virtual void update(const Timeline &) override;
 };
+
+// Called by server/client to register game object classes
+inline void RegisterGameObjectClasses()
+{
+    GameObjectRegistry::Get().RegisterGameObject<RecObject>();
+    GameObjectRegistry::Get().RegisterGameObject<MovingObject>();
+    GameObjectRegistry::Get().RegisterGameObject<Character>();
+}

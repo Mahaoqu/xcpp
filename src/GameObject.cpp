@@ -1,4 +1,5 @@
 #include "GameObject.h"
+#include "GameObjectManager.h"
 #include <iostream>
 
 #include "ScriptManager.h"
@@ -11,16 +12,15 @@ namespace GameEngine
 /** Definitions of static class members */
 int GameObject::current_guid = 0;
 
-std::vector<GameObject *> GameObject::game_objects;
-
 /**
  * Initialize position to (0,0); set guid to incrementing value based on
  * number of objects
  */
-GameObject::GameObject() : x(0), y(0)
+GameObject::GameObject() : x(0), y(0), isCollidable(false)
 {
     guid = "gameobject" + std::to_string(current_guid);
     current_guid++;
+    GameObjectManager::Get().add(this);
     game_objects.push_back(this);
 }
 

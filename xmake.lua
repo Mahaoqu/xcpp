@@ -1,11 +1,11 @@
 add_rules("mode.release", "mode.debug") 
 
-add_requires("v8", "sfml", "cppzmq", "gtest")
+add_requires("v8", "sfml", "cppzmq", "nlohmann_json", "gtest")
 set_languages("c++17")
 
 add_defines("V8_COMPRESS_POINTERS")
 add_includedirs("$(projectdir)/include")
-add_packages("v8", "sfml", "cppzmq")
+add_packages("v8", "sfml", "cppzmq", "nlohmann_json")
 
 target("engine")
     set_kind("static")

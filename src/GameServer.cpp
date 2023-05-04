@@ -1,5 +1,6 @@
 #include "GameServer.h"
-#include "Network.h"
+#include "GameObjectManager.h"
+#include "NetworkManager.h"
 
 namespace GameEngine
 {
@@ -30,18 +31,23 @@ void GameServer::newHandleClientThread()
 
             PacketType type = static_cast<PacketType>(data[0]);
 
+            char *payload = data + 1;
             switch (type)
             {
             case PacketType::PT_HELLO:
+                onNewClient(payload);
                 break;
 
             case PacketType::PT_INPUT:
+                onClientInput(payload);
                 break;
 
             case PacketType::PT_DISCONNECT:
+                onClientDisconnected(payload);
                 break;
 
             default:
+                std::cerr << "Invalid packet type received." << std::endl;
                 break;
             }
         }
@@ -69,15 +75,15 @@ void GameServer::run()
     while (true)
     {
         // Update clock
-        tl.addNewKeyFrame();
+        tl.newFrame();
         // Run game logic
         gameLogic();
 
-        // Publish game state
+        // Publish game state / publish game event
         std::string game_state = getGameStates();
         publisher.send(zmq::message_t(game_state));
 
-        std::cout << "Sending game state " << game_state.size() << " bytes." << std::endl;
+        // std::cout << "Sending game state " << game_state.size() << " bytes." << std::endl;
 
         // Sleep
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
@@ -86,15 +92,22 @@ void GameServer::run()
 
 void GameServer::gameLogic()
 {
-    for (auto obj : GameObject::game_objects)
+    // handle all events
+
+    // update logics
+    for (auto obj : GameObjectManager::Get().getObjects())
     {
         obj->update(tl);
     }
 }
 
-std::string GameServer::getGameStates()
+json GameServer::getGameStates()
 {
-    return std::string();
+    json j;
+    j["frame"] = tl.getFrameCount();
+    json objs = GameObjectManager::Get().toJSON();
+    j["objects"] = objs;
+    return j;
 }
 
 } // namespace GameEngine

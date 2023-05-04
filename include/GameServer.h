@@ -21,9 +21,20 @@ class GameServer
     void addObject(GameObject *obj);
     void run();
 
+    virtual void onNewClient(void *payload)
+    {
+    }
+
+    virtual void onClientDisconnected(void *payload)
+    {
+    }
+    virtual void onClientInput(void *payload)
+    {
+    }
+
     void gameLogic();
 
-    std::string getGameStates();
+    json getGameStates();
 };
 
 } // namespace GameEngine

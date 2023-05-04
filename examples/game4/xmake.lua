@@ -1,5 +1,11 @@
-target("game4")
+target("game4-client")
     set_kind("binary")
-    add_files("*.cpp")
+    add_files("*.cpp|server.cpp")
+    add_deps("engine")
+    set_rundir(os.scriptdir())
+
+target("game4-server")
+    set_kind("binary")
+    add_files("*.cpp|client.cpp")
     add_deps("engine")
     set_rundir(os.scriptdir())

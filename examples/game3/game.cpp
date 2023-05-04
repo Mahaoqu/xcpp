@@ -30,14 +30,7 @@ void MovingObject::update(const Timeline &tl)
 
 void Character::update(const Timeline &tl)
 {
-    // Check user input
-    // updateByInput();
-
-    // Check collision
-    for (auto obj : GameObject::game_objects)
-    {
-        
-    }
+    
 
     MovingObject::update(tl);
 }

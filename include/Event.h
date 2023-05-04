@@ -6,23 +6,15 @@
 namespace GameEngine
 {
 
-class Event : public GameObject
+class Event
 {
   private:
-    /* data */
+    int event_type_id; // Defined by yourself
+    double time;       // Time of event
+
   public:
-    Event(/* args */);
-    ~Event();
-
-    static std::list<GameObject *> listener;
+    Event() = default;
+    ~Event() = default; // Must be trivially destructible
 };
-
-Event::Event(/* args */)
-{
-}
-
-Event::~Event()
-{
-}
 
 } // namespace GameEngine
